@@ -25,8 +25,13 @@ Objectives of this program:
 
 int main(){
 
+
+
     //directory path
     const char *dirpath = "/home/billDesktop";
+
+    //get the current dir
+    char *cwd = getcwd(cwd, MAX_BUFFER);
 
     //pointer to a dirent structure
     struct dirent *directoryEntry;
@@ -35,16 +40,20 @@ int main(){
     DIR *dir = opendir(dirpath);
 
     //file stats
-    struct stat *fileStats;
-
+    //struct stat fileStats;
+    //struct stat *pfileStats = &fileStats;
     //reference: https://stackoverflow.com/questions/3554120/open-directory-using-c
     while ((directoryEntry = readdir(dir)) != NULL){
+        //print directory
         printf("%s\n", directoryEntry->d_name);
-    
+
+        //get stats, print stats
+        //stat(dirpath, pfileStats);
+        //printf("%lu", pfileStats);
+
     }
 
-    //get the current dir
-    char *cwd = getcwd(cwd, MAX_BUFFER);
+    
 
     
     //close the directory stream
