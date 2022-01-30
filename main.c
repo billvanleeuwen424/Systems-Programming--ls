@@ -24,7 +24,7 @@ Objectives of this program:
 
 
 char * getFilepathString(struct dirent *pdirectoryEntry, char *dirpath);
-int getLastFileAccess(struct stat *pfileStats, char *fullPath);
+int getLastFileModification(struct stat *pfileStats, char *fullPath);
 int getFileSize(struct stat *pfileStats, char *fullPath);
 
 
@@ -46,8 +46,8 @@ int main(){
 
     //pointer to the directory
     DIR *dir = opendir(dirpath);
-    
-        
+
+
     //directory entry
     struct dirent directoryEntry;
     struct dirent *pdirectoryEntry = &directoryEntry;
@@ -63,8 +63,8 @@ int main(){
         char *fullPath = getFilepathString(pdirectoryEntry, dirpath);
         printf("%s\n", fullPath);
         
-        int lastAccess = getLastFileAccess(pfileStats, fullPath);
-        printf("%i\n", lastAccess);
+        int lastModification = getLastFileModification(pfileStats, fullPath);
+        printf("%i\n", lastModification);
 
         int fileSize = getFileSize(pfileStats, fullPath);
         printf("%i\n", fileSize);
@@ -96,10 +96,10 @@ char * getFilepathString(struct dirent *pdirectoryEntry, char *dirpath){
 }
 
 /*
-This function will return the last access time in epoch time.
+This function will return the last modification time in epoch time.
 it requires a pointer to a stat type, and the filepath of the deisred file.
 */
-int getLastFileAccess(struct stat *pfileStats, char *fullPath){
+int getLastFileModification(struct stat *pfileStats, char *fullPath){
 
     stat(fullPath, pfileStats);
 
