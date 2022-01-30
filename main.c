@@ -6,7 +6,7 @@ Objectives of this program:
     the oldest file
 */
 
-char * stringFileNameandPath(dirent *directoryEntry, char dirpath[]);
+
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -19,6 +19,12 @@ char * stringFileNameandPath(dirent *directoryEntry, char dirpath[]);
 #include <sys/stat.h>
 //for getcwd
 #include <unistd.h>
+
+
+
+
+char * getFilepathString(struct dirent *directoryEntry, char *dirpath);
+
 
 //command line params
 //argc = num of params
@@ -33,7 +39,7 @@ int main(){
     char *cwd = getcwd(cwd, MAX_BUFFER);
 
     //directory path
-    char dirpath[] = "/home/billDesktop/Documents/TrentU/3380/";
+    char *dirpath = "/home/billDesktop/Documents/TrentU/3380/";
 
 
     //pointer to a dirent structure
@@ -51,8 +57,9 @@ int main(){
     while ((directoryEntry = readdir(dir)) != NULL){
 
 
-        
+        char *fullPath = getFilepathString(directoryEntry, dirpath);
 
+        printf("%s\n", fullPath);
         /*
         //get stats, print stats
         stat(filepath, &fileStats);
@@ -65,15 +72,17 @@ int main(){
 
 }
 
+
+
 /*
 This function will return a filename with its path as a single string.
 It requires the files directory entry, and the path of the file.
 */
-char * stringFileNameandPath(dirent *directoryEntry, char dirpath[]){
+char * getFilepathString(struct dirent *directoryEntry, char *dirpath){
     //get filename from the dirent
     const char *filename = directoryEntry->d_name;
 
-    char filepath[250];
+    char *filepath;
 
     //put the directory into the filepath, then concat the filename onto it.
     strcpy(filepath,dirpath);
