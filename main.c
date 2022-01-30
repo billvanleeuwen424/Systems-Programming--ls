@@ -6,6 +6,8 @@ Objectives of this program:
     the oldest file
 */
 
+char * stringFileNameandPath(dirent *directoryEntry, char dirpath[]);
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -48,18 +50,12 @@ int main(){
     //reference: https://stackoverflow.com/questions/3554120/open-directory-using-c
     while ((directoryEntry = readdir(dir)) != NULL){
 
-        char filename[250];
 
-        strcpy(filename,dirpath);
-        const char *oldfilename = directoryEntry->d_name;
-
-
-        strcat(filename,oldfilename);
-        printf("%s\n", filename);
+        
 
         /*
         //get stats, print stats
-        stat(filename, &fileStats);
+        stat(filepath, &fileStats);
         printf("%i\n", pfileStats->st_atime);
         */
     }
@@ -67,4 +63,21 @@ int main(){
     //close the directory stream
     return closedir(dir);
 
+}
+
+/*
+This function will return a filename with its path as a single string.
+It requires the files directory entry, and the path of the file.
+*/
+char * stringFileNameandPath(dirent *directoryEntry, char dirpath[]){
+    //get filename from the dirent
+    const char *filename = directoryEntry->d_name;
+
+    char filepath[250];
+
+    //put the directory into the filepath, then concat the filename onto it.
+    strcpy(filepath,dirpath);
+    strcat(filepath,filename);
+
+    return filepath;
 }
