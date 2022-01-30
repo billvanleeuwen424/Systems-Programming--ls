@@ -37,9 +37,12 @@ int getFileSize(struct stat *pfileStats, char *fullPath);
 
 int main(){
 
-    //get the current dir
-    char *cwd = getcwd(cwd, MAX_BUFFER);
 
+    char path[MAX_BUFFER];
+
+    getcwd(path, MAX_BUFFER);
+    printf("Current working directory: %s\n", path);
+    
     //directory path
     char *dirpath = "/home/billDesktop/Documents/TrentU/3380/";
 
@@ -59,10 +62,13 @@ int main(){
     //reference: https://stackoverflow.com/questions/3554120/open-directory-using-c
     while ((pdirectoryEntry = readdir(dir)) != NULL){
 
+        //we dont need stats on . or ..
+
+        //printf(" strcomp %i\n", strcmp(".",pdirectoryEntry->d_name));
 
         char *fullPath = getFilepathString(pdirectoryEntry, dirpath);
         printf("%s\n", fullPath);
-        
+
         int lastModification = getLastFileModification(pfileStats, fullPath);
         printf("%i\n", lastModification);
 
@@ -106,7 +112,10 @@ int getLastFileModification(struct stat *pfileStats, char *fullPath){
     return pfileStats->st_atime;
 }
 
-
+/*
+This function will return the size of the file (bytes).
+it requires a pointer to a stat type, and the filepath of the deisred file.
+*/
 int getFileSize(struct stat *pfileStats, char *fullPath){
 
     stat(fullPath, pfileStats);
