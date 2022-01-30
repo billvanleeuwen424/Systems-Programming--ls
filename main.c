@@ -23,7 +23,9 @@ Objectives of this program:
 
 
 
-char * getFilepathString(struct dirent *directoryEntry, char *dirpath);
+char * getFilepathString(struct dirent *pdirectoryEntry, char *dirpath);
+int getLastFileAccess(struct stat *pfileStats, char *fullPath);
+int getFileSize(struct stat *pfileStats, char *fullPath);
 
 
 //command line params
@@ -42,29 +44,31 @@ int main(){
     char *dirpath = "/home/billDesktop/Documents/TrentU/3380/";
 
 
-    //pointer to a dirent structure
-    struct dirent *directoryEntry;
-
-    //pointer to the directory type
+    //pointer to the directory
     DIR *dir = opendir(dirpath);
+    
+        
+    //directory entry
+    struct dirent directoryEntry;
+    struct dirent *pdirectoryEntry = &directoryEntry;
 
     //file stats
     struct stat fileStats;
     struct stat *pfileStats = &fileStats;
 
-
     //reference: https://stackoverflow.com/questions/3554120/open-directory-using-c
-    while ((directoryEntry = readdir(dir)) != NULL){
+    while ((pdirectoryEntry = readdir(dir)) != NULL){
 
 
-        char *fullPath = getFilepathString(directoryEntry, dirpath);
-
+        char *fullPath = getFilepathString(pdirectoryEntry, dirpath);
         printf("%s\n", fullPath);
-        /*
-        //get stats, print stats
-        stat(filepath, &fileStats);
-        printf("%i\n", pfileStats->st_atime);
-        */
+        
+        int lastAccess = getLastFileAccess(pfileStats, fullPath);
+        printf("%i\n", lastAccess);
+
+        int fileSize = getFileSize(pfileStats, fullPath);
+        printf("%i\n", fileSize);
+        
     }
     
     //close the directory stream
@@ -78,9 +82,9 @@ int main(){
 This function will return a filename with its path as a single string.
 It requires the files directory entry, and the path of the file.
 */
-char * getFilepathString(struct dirent *directoryEntry, char *dirpath){
+char * getFilepathString(struct dirent *pdirectoryEntry, char *dirpath){
     //get filename from the dirent
-    const char *filename = directoryEntry->d_name;
+    const char *filename = pdirectoryEntry->d_name;
 
     char *filepath;
 
@@ -89,4 +93,23 @@ char * getFilepathString(struct dirent *directoryEntry, char *dirpath){
     strcat(filepath,filename);
 
     return filepath;
+}
+
+/*
+This function will return the last access time in epoch time.
+it requires a pointer to a stat type, and the filepath of the deisred file.
+*/
+int getLastFileAccess(struct stat *pfileStats, char *fullPath){
+
+    stat(fullPath, pfileStats);
+
+    return pfileStats->st_atime;
+}
+
+
+int getFileSize(struct stat *pfileStats, char *fullPath){
+
+    stat(fullPath, pfileStats);
+
+    return pfileStats->st_size;
 }
