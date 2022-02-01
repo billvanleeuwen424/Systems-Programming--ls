@@ -59,12 +59,30 @@ int main(){
     struct stat fileStats;
     struct stat *pfileStats = &fileStats;
 
+
+
+    //objective files storage
+    struct dirent largestDirent;
+    struct stat largestStats;
+    struct stat *plargestStats = &largestStats;
+
+    struct dirent smallestDirent;
+    struct stat smallestStats;
+    struct stat *psmallestStats = &smallestStats;
+
+    struct dirent mostRecentDirent;
+    struct stat mostRecentStats;
+    struct stat *pmostRecentStats = &mostRecentStats;
+    
+    struct dirent leastRecentDirent;
+    struct stat leastRecentStats;
+    struct stat *pleastRecentStats = &leastRecentStats;
+
+
     //reference: https://stackoverflow.com/questions/3554120/open-directory-using-c
     while ((pdirectoryEntry = readdir(dir)) != NULL){
 
-        //we dont need stats on . or ..
-
-        //printf(" strcomp %i\n", strcmp(".",pdirectoryEntry->d_name));
+        
 
         char *fullPath = getFilepathString(pdirectoryEntry, dirpath);
         printf("%s\n", fullPath);
@@ -75,6 +93,23 @@ int main(){
         int fileSize = getFileSize(pfileStats, fullPath);
         printf("%i\n", fileSize);
         
+        //check largest
+        if(plargestStats == NULL || pfileStats->st_size > plargestStats->st_size){
+            largestStats = fileStats;
+        }
+        //check smallest
+        if(psmallestStats == NULL || pfileStats->st_size > psmallestStats->st_size){
+            smallestStats = fileStats;
+        }
+        //check mostRecent
+        if(pmostRecentStats == NULL || pfileStats->st_size > pmostRecentStats->st_size){
+            mostRecentStats = fileStats;
+        }
+        //check leastRecent
+        if(pleastRecentStats == NULL || pfileStats->st_size > pleastRecentStats->st_size){
+            leastRecentStats = fileStats;
+        }
+
     }
     
     //close the directory stream
