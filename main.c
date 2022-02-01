@@ -13,11 +13,11 @@ Objectives of this program:
 #include <string.h>
 
 
-//for opendir and readdir
+/*for opendir and readdir*/
 #include <dirent.h>
-//file stats
+/*file stats*/
 #include <sys/stat.h>
-//for getcwd
+/*for getcwd*/
 #include <unistd.h>
 
 
@@ -28,10 +28,10 @@ int getLastFileModification(struct stat *pfileStats, char *fullPath);
 int getFileSize(struct stat *pfileStats, char *fullPath);
 void printFileStats(struct dirent *pdirectoryEntry, struct stat *pfileStats, char *dirpath);
 
-//command line params
-//argc = num of params
-//char *argv[] is the array of params
-//int argc, char *argv[]
+/*command line params*/
+/*argc = num of params*/
+/*char *argv[] is the array of params*/
+/*int argc, char *argv[]*/
 
 #define MAX_BUFFER 4096
 
@@ -41,27 +41,27 @@ int main(){
     char path[MAX_BUFFER];
 
     getcwd(path, MAX_BUFFER);
-    printf("Current working directory: %s\n", path);
+    printf("Current working directory: %s\n\n", path);
     
-    //directory path
-    char *dirpath = "/home/billDesktop/Documents/TrentU/3380/";
+    /*directory path*/
+    char *dirpath = path;
 
-
-    //pointer to the directory
+    /*pointer to the directory*/
     DIR *dir = opendir(dirpath);
 
 
-    //directory entry
-    struct dirent directoryEntry;
-    struct dirent *pdirectoryEntry;
 
-    //file stats
+    /*directory entry*/
+    struct dirent directoryEntry;
+    struct dirent *pdirectoryEntry = &directoryEntry;
+
+    /*file stats*/
     struct stat fileStats;
     struct stat *pfileStats = &fileStats;
 
 
 
-    //objective files storage
+    /*objective files storage*/
     char * largestFilepath;
     struct dirent largestDirent;
     struct dirent *plargestDirent = &largestDirent;
@@ -87,50 +87,51 @@ int main(){
     struct stat *pleastRecentStats = &leastRecentStats;
 
 
-    //reference: https://stackoverflow.com/questions/3554120/open-directory-using-c
+    /*reference: https://stackoverflow.com/questions/3554120/open-directory-using-c*/
     while ((pdirectoryEntry = readdir(dir)) != NULL){
 
-        
 
         char *fullPath = getFilepathString(pdirectoryEntry, dirpath);
-        //printf("%s\n", fullPath);
 
         int lastModification = getLastFileModification(pfileStats, fullPath);
-        //printf("%i\n", lastModification);
 
         int fileSize = getFileSize(pfileStats, fullPath);
-        //printf("%i\n", fileSize);
         
-        //check largest
+
+        /*check largest*/
         if(plargestStats == NULL || pfileStats->st_size > plargestStats->st_size){
             largestFilepath = fullPath;
-            largestDirent = *pdirectoryEntry;
+            largestDirent = directoryEntry;
             largestStats = fileStats;
         }
-        //check smallest
+        /*check smallest*/
         if(psmallestStats == NULL || pfileStats->st_size < psmallestStats->st_size){
             smallestFilepath = fullPath;
-            smallestDirent = *pdirectoryEntry;
+            smallestDirent = directoryEntry;
             smallestStats = fileStats;
         }
-        //check mostRecent
+        /*check mostRecent*/
         if(pmostRecentStats == NULL || pfileStats->st_atime > pmostRecentStats->st_atime){
             mostRecentFilepath = fullPath;
-            mostRecentDirent = *pdirectoryEntry;
+            mostRecentDirent = directoryEntry;
             mostRecentStats = fileStats;
         }
-        //check leastRecent
+        /*check leastRecent*/
         if(pleastRecentStats == NULL || pfileStats->st_atime < pleastRecentStats->st_atime){
             leastRecentFilepath = fullPath;
-            leastRecentDirent = *pdirectoryEntry;
+            leastRecentDirent = directoryEntry;
             leastRecentStats = fileStats;
         }
-
     }
 
     printFileStats(plargestDirent,plargestStats,dirpath);
-    
-    //close the directory stream
+    printFileStats(psmallestDirent,psmallestStats,dirpath);
+    printFileStats(pmostRecentDirent,pmostRecentStats,dirpath);
+    printFileStats(pleastRecentDirent,pleastRecentStats,dirpath);
+
+
+
+    /*close the directory stream*/
     return closedir(dir);
 
 }
@@ -142,12 +143,12 @@ This function will return a filename with its path as a single string.
 It requires the files directory entry, and the path of the file.
 */
 char * getFilepathString(struct dirent *pdirectoryEntry, char *dirpath){
-    //get filename from the dirent
+    /*get filename from the dirent*/
     const char *filename = pdirectoryEntry->d_name;
 
     char *filepath;
 
-    //put the directory into the filepath, then concat the filename onto it.
+    /*put the directory into the filepath, then concat the filename onto it.*/
     strcpy(filepath,dirpath);
     strcat(filepath,filename);
 
