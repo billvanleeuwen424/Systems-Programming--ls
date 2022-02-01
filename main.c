@@ -26,7 +26,7 @@ Objectives of this program:
 char * getFilepathString(struct dirent *pdirectoryEntry, char *dirpath);
 int getLastFileModification(struct stat *pfileStats, char *fullPath);
 int getFileSize(struct stat *pfileStats, char *fullPath);
-
+void printFileStats(struct dirent *pdirectoryEntry, struct stat *pfileStats, char *dirpath);
 
 //command line params
 //argc = num of params
@@ -63,18 +63,22 @@ int main(){
 
     //objective files storage
     struct dirent largestDirent;
+    struct dirent *plargestDirent = &largestDirent;
     struct stat largestStats;
     struct stat *plargestStats = &largestStats;
 
     struct dirent smallestDirent;
+    struct dirent *psmallestDirent = &smallestDirent;
     struct stat smallestStats;
     struct stat *psmallestStats = &smallestStats;
 
     struct dirent mostRecentDirent;
+    struct dirent *pmostRecentDirent = &mostRecentDirent;
     struct stat mostRecentStats;
     struct stat *pmostRecentStats = &mostRecentStats;
-    
+
     struct dirent leastRecentDirent;
+    struct dirent *pleastRecentDirent = &leastRecentDirent;
     struct stat leastRecentStats;
     struct stat *pleastRecentStats = &leastRecentStats;
 
@@ -85,32 +89,38 @@ int main(){
         
 
         char *fullPath = getFilepathString(pdirectoryEntry, dirpath);
-        printf("%s\n", fullPath);
+        //printf("%s\n", fullPath);
 
         int lastModification = getLastFileModification(pfileStats, fullPath);
-        printf("%i\n", lastModification);
+        //printf("%i\n", lastModification);
 
         int fileSize = getFileSize(pfileStats, fullPath);
-        printf("%i\n", fileSize);
+        //printf("%i\n", fileSize);
         
         //check largest
         if(plargestStats == NULL || pfileStats->st_size > plargestStats->st_size){
+            largestDirent = directoryEntry;
             largestStats = fileStats;
         }
         //check smallest
-        if(psmallestStats == NULL || pfileStats->st_size > psmallestStats->st_size){
+        if(psmallestStats == NULL || pfileStats->st_size < psmallestStats->st_size){
+            smallestDirent = directoryEntry;
             smallestStats = fileStats;
         }
         //check mostRecent
-        if(pmostRecentStats == NULL || pfileStats->st_size > pmostRecentStats->st_size){
+        if(pmostRecentStats == NULL || pfileStats->st_atime > pmostRecentStats->st_atime){
+            mostRecentDirent = directoryEntry;
             mostRecentStats = fileStats;
         }
         //check leastRecent
-        if(pleastRecentStats == NULL || pfileStats->st_size > pleastRecentStats->st_size){
+        if(pleastRecentStats == NULL || pfileStats->st_atime < pleastRecentStats->st_atime){
+            leastRecentDirent = directoryEntry;
             leastRecentStats = fileStats;
         }
 
     }
+
+    printFileStats(plargestDirent,plargestStats,dirpath);
     
     //close the directory stream
     return closedir(dir);
@@ -156,4 +166,13 @@ int getFileSize(struct stat *pfileStats, char *fullPath){
     stat(fullPath, pfileStats);
 
     return pfileStats->st_size;
+}
+
+void printFileStats(struct dirent *pdirectoryEntry, struct stat *pfileStats, char *dirpath){
+
+    char *fullPath = getFilepathString(pdirectoryEntry, dirpath);
+    printf(" %s", fullPath);
+
+    printf(" %i", getFileSize(pfileStats, fullPath));
+    printf(" %i", getLastFileModification(pfileStats, fullPath));
 }
