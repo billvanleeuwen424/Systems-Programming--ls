@@ -53,7 +53,7 @@ int main(){
 
     //directory entry
     struct dirent directoryEntry;
-    struct dirent *pdirectoryEntry = &directoryEntry;
+    struct dirent *pdirectoryEntry;
 
     //file stats
     struct stat fileStats;
@@ -62,21 +62,25 @@ int main(){
 
 
     //objective files storage
+    char * largestFilepath;
     struct dirent largestDirent;
     struct dirent *plargestDirent = &largestDirent;
     struct stat largestStats;
     struct stat *plargestStats = &largestStats;
 
+    char * smallestFilepath;
     struct dirent smallestDirent;
     struct dirent *psmallestDirent = &smallestDirent;
     struct stat smallestStats;
     struct stat *psmallestStats = &smallestStats;
 
+    char * mostRecentFilepath;
     struct dirent mostRecentDirent;
     struct dirent *pmostRecentDirent = &mostRecentDirent;
     struct stat mostRecentStats;
     struct stat *pmostRecentStats = &mostRecentStats;
 
+    char * leastRecentFilepath;
     struct dirent leastRecentDirent;
     struct dirent *pleastRecentDirent = &leastRecentDirent;
     struct stat leastRecentStats;
@@ -99,22 +103,26 @@ int main(){
         
         //check largest
         if(plargestStats == NULL || pfileStats->st_size > plargestStats->st_size){
-            largestDirent = directoryEntry;
+            largestFilepath = fullPath;
+            largestDirent = *pdirectoryEntry;
             largestStats = fileStats;
         }
         //check smallest
         if(psmallestStats == NULL || pfileStats->st_size < psmallestStats->st_size){
-            smallestDirent = directoryEntry;
+            smallestFilepath = fullPath;
+            smallestDirent = *pdirectoryEntry;
             smallestStats = fileStats;
         }
         //check mostRecent
         if(pmostRecentStats == NULL || pfileStats->st_atime > pmostRecentStats->st_atime){
-            mostRecentDirent = directoryEntry;
+            mostRecentFilepath = fullPath;
+            mostRecentDirent = *pdirectoryEntry;
             mostRecentStats = fileStats;
         }
         //check leastRecent
         if(pleastRecentStats == NULL || pfileStats->st_atime < pleastRecentStats->st_atime){
-            leastRecentDirent = directoryEntry;
+            leastRecentFilepath = fullPath;
+            leastRecentDirent = *pdirectoryEntry;
             leastRecentStats = fileStats;
         }
 
@@ -168,11 +176,10 @@ int getFileSize(struct stat *pfileStats, char *fullPath){
     return pfileStats->st_size;
 }
 
-void printFileStats(struct dirent *pdirectoryEntry, struct stat *pfileStats, char *dirpath){
+void printFileStats(struct dirent *pdirectoryEntry, struct stat *pfileStats, char *fullPath){
 
-    char *fullPath = getFilepathString(pdirectoryEntry, dirpath);
-    printf(" %s", fullPath);
+    printf(" %s\n", pdirectoryEntry->d_name);
 
-    printf(" %i", getFileSize(pfileStats, fullPath));
-    printf(" %i", getLastFileModification(pfileStats, fullPath));
+    printf(" %i\n", getFileSize(pfileStats, fullPath));
+    printf(" %i\n", getLastFileModification(pfileStats, fullPath));
 }
