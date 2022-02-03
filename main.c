@@ -29,7 +29,7 @@ int main( int argc, char *argv[] )
     /*debugging*/
     argc = 2;
     argv[0] = "./main";
-    argv[1] = "/home";
+    argv[1] = "/fakeDir/Fake";
 
 
     /*************************
@@ -165,13 +165,11 @@ int tryOpenDir(DIR **dir, char * dirpath){
     
     *dir = opendir(dirpath);
 
-    if(dir == NULL){
+    if(*dir == NULL){
 
         /*reference. GNU C Library - Section 2.3 */
-        fprintf (stderr, "%s: Couldn't open directory %s; %s\n",
-               "tryOpenDir", dirpath, strerror (errno));
+        fprintf (stderr, "%s: Couldn't open directory %s; %s\n", "tryOpenDir", dirpath, strerror (errno));
 
-        printf("Directory does not exist. Exit. \n");
         returnVal = -1;
     }
 
