@@ -15,6 +15,9 @@ void cpyDirectory(char * director, int position, char *argv[]);
 int getLastFileModification(struct stat *pfileStats, char *fullPath);
 int getFileSize(struct stat *pfileStats, char *fullPath);
 int tryOpenDir(DIR **dir, char * dirpath);
+int tryReadDir(DIR **dir, struct dirent **dirEntry);
+void getFullPath(struct dirent *pdirectoryEntry, char *dirpath, char *fullPath);
+int tryStat(struct stat *fileStats, char *fullPath);
 
 #define MAX_DIR_LENGTH 256
 #define MAX_PARAMS 2
@@ -29,8 +32,8 @@ int main( int argc, char *argv[] )
     /*debugging*/
     argc = 2;
     argv[0] = "./main";
-    argv[1] = "/fakeDir/Fake";
-
+    //argv[1] = "/fakeDir/Fake";
+    argv[1] = "/home/billslaptop/Documents/TrentU/3380";
 
     /*************************
      * GET DIRECTORY SECTION *
@@ -64,11 +67,26 @@ int main( int argc, char *argv[] )
         exit(1);
     }
 
-    struct dirent *entry;
+    struct dirent *dirEntry;
+    char filePath[MAX_BUFFER];
+    struct stat fileStat;
+    struct stat *pfileStat = &fileStat;
+    
 
-    //reference: https://stackoverflow.com/questions/3554120/open-directory-using-c
-    while ((entry = readdir(dir)) != NULL){
+    /*loop here til error or null entry*/
+    while (tryReadDir(&dir, &dirEntry) == 0){
+
+        getFullPath(dirEntry,directoryName,filePath);
+
+        printf(" %s", dirEntry->d_name);
         
+        if(tryStat(pfileStat, filePath) != 0){
+            exit(1);
+        }
+        else {
+            printf(" %lu\n", pfileStat->st_size);
+            printf(" %lu\n", pfileStat->st_atime);
+        }
     }
 
     return 0;
@@ -168,8 +186,67 @@ int tryOpenDir(DIR **dir, char * dirpath){
     if(*dir == NULL){
 
         /*reference. GNU C Library - Section 2.3 */
-        fprintf (stderr, "%s: Couldn't open directory %s; %s\n", "tryOpenDir", dirpath, strerror (errno));
+        fprintf (stderr, "%s: Couldn't open directory %s; %s\n", "tryOpenDir", dirpath, strerror(errno));
 
+        returnVal = -1;
+    }
+
+    return returnVal;
+}
+
+/*
+This function will read the next entry in the directory.
+it will check if the directory entry is NULL and return -1 if error, or return 1 if just end of directory
+*/
+int tryReadDir(DIR **dir, struct dirent **dirEntry){
+
+    errno = 0;
+
+    int returnVal = 0;
+
+    *dirEntry = readdir(*dir);
+
+    if(*dirEntry == NULL){   
+        if (errno != 0){    /*if there is an error*/
+
+            returnVal = -1;        
+            fprintf (stderr, "%s: Couldn't open next entry in directory; %s\n", "tryReadDir", strerror(errno));
+
+        }
+        else{               /*if we just reached the end of the directory*/
+            returnVal = 1;
+        }
+    }                       /* else should still just be zero */
+    
+    return returnVal;
+}
+
+
+/*
+This function will return a filename with its path as a single string.
+It requires the files directory entry, and the path of the file.
+*/
+void getFullPath(struct dirent *pdirectoryEntry, char *dirpath, char *fullPath){
+
+    strncpy(fullPath, dirpath, MAX_BUFFER );
+
+    strncat(fullPath,"//",1);
+
+    strncat(fullPath,pdirectoryEntry->d_name,MAX_BUFFER);
+
+}
+
+/*this function will try stat, upon any errors will return -1*/
+int tryStat(struct stat *fileStats, char *fullPath){
+
+    int returnVal = 0;
+
+    errno = 0;
+
+    stat(fullPath, fileStats);
+
+    if(errno != 0){
+        fprintf (stderr, "%s: Couldn't open stats on file %s; %s\n", "tryStat",fullPath, strerror(errno));
         returnVal = -1;
     }
 
