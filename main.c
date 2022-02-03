@@ -14,7 +14,7 @@ int checkMaxParams(int argc, char *argv[]);
 void cpyDirectory(char * director, int position, char *argv[]);
 int getLastFileModification(struct stat *pfileStats, char *fullPath);
 int getFileSize(struct stat *pfileStats, char *fullPath);
-int tryOpenDir(DIR *dir, char * dirpath);
+int tryOpenDir(DIR **dir, char * dirpath);
 
 #define MAX_DIR_LENGTH 256
 #define MAX_PARAMS 2
@@ -26,6 +26,11 @@ int tryOpenDir(DIR *dir, char * dirpath);
 
 int main( int argc, char *argv[] )
 {
+    /*debugging*/
+    argc = 2;
+    argv[0] = "./main";
+    argv[1] = "/home";
+
 
     /*************************
      * GET DIRECTORY SECTION *
@@ -55,7 +60,7 @@ int main( int argc, char *argv[] )
 
     DIR *dir;
     /*try to open the dir*/
-    if(tryOpenDir(dir, directoryName) == -1){
+    if(tryOpenDir(&dir, directoryName) == -1){
         exit(1);
     }
 
@@ -109,7 +114,7 @@ int checkMaxParams(int argc, char *argv[]){
         printf("Too many parameters. Exit. \n");
         returnval = 1;
     }
-    else if (argc < MIN_PARAMS)
+    else if (argc <= MIN_PARAMS)
     {
         returnval = -1;
     }
@@ -151,13 +156,21 @@ int getFileSize(struct stat *pfileStats, char *fullPath){
 This function just opens the directory specificed in the string passed.
 it will check if the directory stream is NULL and return -1 if that is the case.
 */
-int tryOpenDir(DIR *dir, char * dirpath){
+int tryOpenDir(DIR **dir, char * dirpath){
     
+    /*clear errno*/
+    errno = 0; 
+
     int returnVal = 0;
     
-    dir = opendir(dirpath);
+    *dir = opendir(dirpath);
 
     if(dir == NULL){
+
+        /*reference. GNU C Library - Section 2.3 */
+        fprintf (stderr, "%s: Couldn't open directory %s; %s\n",
+               "tryOpenDir", dirpath, strerror (errno));
+
         printf("Directory does not exist. Exit. \n");
         returnVal = -1;
     }
