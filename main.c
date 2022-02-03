@@ -7,11 +7,14 @@
 #include <sys/stat.h>
 //for getcwd
 #include <unistd.h>
+//for errno
+#include <errno.h>
 
 int checkMaxParams(int argc, char *argv[]);
 void cpyDirectory(char * director, int position, char *argv[]);
 int getLastFileModification(struct stat *pfileStats, char *fullPath);
 int getFileSize(struct stat *pfileStats, char *fullPath);
+int tryOpenDir(DIR *dir, char * dirpath);
 
 #define MAX_DIR_LENGTH 256
 #define MAX_PARAMS 2
@@ -32,6 +35,7 @@ int main( int argc, char *argv[] )
 
     int maxParamReturnVal = checkMaxParams(argc, argv);
     
+    /*error check and get either cwd or cmdline arg */
     if(maxParamReturnVal == 1){ /*too many params*/
         exit(1);
     }
@@ -42,17 +46,25 @@ int main( int argc, char *argv[] )
 
     else{
         cpyDirectory(directoryName, 1, argv);   /*copy the dirname from argv*/
-    }
-
-    printf(" %s", directoryName);
-    
+    }  
     
 
     /**************************
      * GET FILE STATS SECTION *
      **************************/
 
-    
+    DIR *dir;
+    /*try to open the dir*/
+    if(tryOpenDir(dir, directoryName) == -1){
+        exit(1);
+    }
+
+    struct dirent *entry;
+
+    //reference: https://stackoverflow.com/questions/3554120/open-directory-using-c
+    while ((entry = readdir(dir)) != NULL){
+        
+    }
 
     return 0;
 }
@@ -94,7 +106,7 @@ int checkMaxParams(int argc, char *argv[]){
     int returnval = 0;
 
     if( argc > MAX_PARAMS ){
-        printf("Too many parameters. Quitting. \n");
+        printf("Too many parameters. Exit. \n");
         returnval = 1;
     }
     else if (argc < MIN_PARAMS)
@@ -135,6 +147,20 @@ int getFileSize(struct stat *pfileStats, char *fullPath){
     return pfileStats->st_size;
 }
 
-int openDirectory(char * dirpath){
+/*
+This function just opens the directory specificed in the string passed.
+it will check if the directory stream is NULL and return -1 if that is the case.
+*/
+int tryOpenDir(DIR *dir, char * dirpath){
     
+    int returnVal = 0;
+    
+    dir = opendir(dirpath);
+
+    if(dir == NULL){
+        printf("Directory does not exist. Exit. \n");
+        returnVal = -1;
+    }
+
+    return returnVal;
 }
