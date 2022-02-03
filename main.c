@@ -1,158 +1,116 @@
-/* 
-Objectives of this program:
-    find the largest file
-    find the smallest file
-    the most recently modified file
-    the oldest file
-*/
-
-
-
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-
-
-/*for opendir and readdir*/
+//for opendir and readdir
 #include <dirent.h>
-/*file stats*/
+//file stats
 #include <sys/stat.h>
-/*for getcwd*/
+//for getcwd
 #include <unistd.h>
 
-
-
-
-char * getFilepathString(struct dirent *pdirectoryEntry, char *dirpath);
+int checkMaxParams(int argc, char *argv[]);
+void cpyDirectory(char * director, int position, char *argv[]);
 int getLastFileModification(struct stat *pfileStats, char *fullPath);
 int getFileSize(struct stat *pfileStats, char *fullPath);
-void printFileStats(struct dirent *pdirectoryEntry, struct stat *pfileStats, char *dirpath);
 
-/*command line params*/
-/*argc = num of params*/
-/*char *argv[] is the array of params*/
-/*int argc, char *argv[]*/
+#define MAX_DIR_LENGTH 256
+#define MAX_PARAMS 2
+#define MIN_PARAMS 1
+
 
 #define MAX_BUFFER 4096
 
-int main(){
 
+int main( int argc, char *argv[] )
+{
 
-    char path[MAX_BUFFER];
+    /*************************
+     * GET DIRECTORY SECTION *
+     *************************/
 
-    getcwd(path, MAX_BUFFER);
-    printf("Current working directory: %s\n\n", path);
+    char directoryName[MAX_DIR_LENGTH];
+
+    int maxParamReturnVal = checkMaxParams(argc, argv);
     
-    /*directory path*/
-    char *dirpath = path;
-
-    /*pointer to the directory*/
-    DIR *dir = opendir(dirpath);
-
-
-
-    /*directory entry*/
-    struct dirent directoryEntry;
-    struct dirent *pdirectoryEntry = &directoryEntry;
-
-    /*file stats*/
-    struct stat fileStats;
-    struct stat *pfileStats = &fileStats;
-
-
-
-    /*objective files storage*/
-    char * largestFilepath;
-    struct dirent largestDirent;
-    struct dirent *plargestDirent = &largestDirent;
-    struct stat largestStats;
-    struct stat *plargestStats = &largestStats;
-
-    char * smallestFilepath;
-    struct dirent smallestDirent;
-    struct dirent *psmallestDirent = &smallestDirent;
-    struct stat smallestStats;
-    struct stat *psmallestStats = &smallestStats;
-
-    char * mostRecentFilepath;
-    struct dirent mostRecentDirent;
-    struct dirent *pmostRecentDirent = &mostRecentDirent;
-    struct stat mostRecentStats;
-    struct stat *pmostRecentStats = &mostRecentStats;
-
-    char * leastRecentFilepath;
-    struct dirent leastRecentDirent;
-    struct dirent *pleastRecentDirent = &leastRecentDirent;
-    struct stat leastRecentStats;
-    struct stat *pleastRecentStats = &leastRecentStats;
-
-
-    /*reference: https://stackoverflow.com/questions/3554120/open-directory-using-c*/
-    while ((pdirectoryEntry = readdir(dir)) != NULL){
-
-
-        char *fullPath = getFilepathString(pdirectoryEntry, dirpath);
-
-        int lastModification = getLastFileModification(pfileStats, fullPath);
-
-        int fileSize = getFileSize(pfileStats, fullPath);
-        
-
-        /*check largest*/
-        if(plargestStats == NULL || pfileStats->st_size > plargestStats->st_size){
-            largestFilepath = fullPath;
-            largestDirent = directoryEntry;
-            largestStats = fileStats;
-        }
-        /*check smallest*/
-        if(psmallestStats == NULL || pfileStats->st_size < psmallestStats->st_size){
-            smallestFilepath = fullPath;
-            smallestDirent = directoryEntry;
-            smallestStats = fileStats;
-        }
-        /*check mostRecent*/
-        if(pmostRecentStats == NULL || pfileStats->st_atime > pmostRecentStats->st_atime){
-            mostRecentFilepath = fullPath;
-            mostRecentDirent = directoryEntry;
-            mostRecentStats = fileStats;
-        }
-        /*check leastRecent*/
-        if(pleastRecentStats == NULL || pfileStats->st_atime < pleastRecentStats->st_atime){
-            leastRecentFilepath = fullPath;
-            leastRecentDirent = directoryEntry;
-            leastRecentStats = fileStats;
-        }
+    if(maxParamReturnVal == 1){ /*too many params*/
+        exit(1);
     }
 
-    printFileStats(plargestDirent,plargestStats,dirpath);
-    printFileStats(psmallestDirent,psmallestStats,dirpath);
-    printFileStats(pmostRecentDirent,pmostRecentStats,dirpath);
-    printFileStats(pleastRecentDirent,pleastRecentStats,dirpath);
+    else if(maxParamReturnVal == -1){   /*empty cmdline. getcwd*/
+        getcwd(directoryName, MAX_BUFFER);
+    }
 
+    else{
+        cpyDirectory(directoryName, 1, argv);   /*copy the dirname from argv*/
+    }
 
+    printf(" %s", directoryName);
+    
+    
 
-    /*close the directory stream*/
-    return closedir(dir);
+    /**************************
+     * GET FILE STATS SECTION *
+     **************************/
 
+    
+
+    return 0;
 }
 
 
+/*  pass this function a string, the position of the directory in argv, and of course argv
+ *  this will check if the string is longer than the MAX_DIR_LENGTH
+ */
+void cpyDirectory(char * directory, int position, char *argv[]){
 
-/*
-This function will return a filename with its path as a single string.
-It requires the files directory entry, and the path of the file.
-*/
-char * getFilepathString(struct dirent *pdirectoryEntry, char *dirpath){
-    /*get filename from the dirent*/
-    const char *filename = pdirectoryEntry->d_name;
+    if(strlen(argv[position]) > MAX_DIR_LENGTH ){
+        printf("Directory length longer than %d. Quitting.\n", MAX_DIR_LENGTH);
+        exit(1);
+    }
 
-    char *filepath;
+    else{
+        strncpy(directory, argv[position], MAX_DIR_LENGTH );
+    }
+}
 
-    /*put the directory into the filepath, then concat the filename onto it.*/
-    strcpy(filepath,dirpath);
-    strcat(filepath,filename);
 
-    return filepath;
+/* Pass this function the input from the cmd line
+ * Checks if more params than max
+ * will exit if too many, returns 0 on successful
+ *
+ * return values:
+ *      0: just right amount of params
+ *      1: too many params
+ *      -1: too few params
+ *      
+ * 
+ * Reference: I took this from the /home/COIS/3380/sample_scripts directory.
+ * I also refactored this to make it my own
+ */
+int checkMaxParams(int argc, char *argv[]){
+
+    int parameter_count = 0;
+
+    int returnval = 0;
+
+    if( argc > MAX_PARAMS ){
+        printf("Too many parameters. Quitting. \n");
+        returnval = 1;
+    }
+    else if (argc < MIN_PARAMS)
+    {
+        returnval = -1;
+    }
+
+    /*DEBUGGING*/
+    while( parameter_count < argc )
+    {
+        printf("\tparameter[%d]: %s\n",parameter_count,argv[parameter_count]);
+        parameter_count++;
+    }
+    printf("\n");
+
+    return returnval;
 }
 
 /*
@@ -177,10 +135,6 @@ int getFileSize(struct stat *pfileStats, char *fullPath){
     return pfileStats->st_size;
 }
 
-void printFileStats(struct dirent *pdirectoryEntry, struct stat *pfileStats, char *fullPath){
-
-    printf(" %s\n", pdirectoryEntry->d_name);
-
-    printf(" %i\n", getFileSize(pfileStats, fullPath));
-    printf(" %i\n", getLastFileModification(pfileStats, fullPath));
+int openDirectory(char * dirpath){
+    
 }
