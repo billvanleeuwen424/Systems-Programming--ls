@@ -25,7 +25,7 @@ int tryOpenDir(DIR **dir, char * dirpath);
 int tryReadDir(DIR **dir, struct dirent **dirEntry);
 void getFullPath(struct dirent *pdirectoryEntry, char *dirpath, char *fullPath);
 int tryStat(struct stat *fileStats, char *fullPath);
-void printLs(struct dirent *dirEntry);
+void printLs(char *filename);
 void printLsl(char *filename, struct stat *pfileStat);
 
 char *filePermStr(mode_t perm, int flags);
