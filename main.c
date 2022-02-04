@@ -52,13 +52,13 @@ int main( int argc, char *argv[] )
     if(maxParamReturnVal == 1){ /*too many params*/
         exit(1);
     }
-
-    else if(maxParamReturnVal == -1){   /*empty cmdline. getcwd*/
+    /*empty cmdline. getcwd*/
+    else if(maxParamReturnVal == -1){   
         getcwd(directoryName, MAX_BUFFER);
     }
-
+    /*copy the dirname from argv*/
     else{
-        cpyDirectory(directoryName, 1, argv);   /*copy the dirname from argv*/
+        cpyDirectory(directoryName, 1, argv);   
     }  
     
 
@@ -83,14 +83,11 @@ int main( int argc, char *argv[] )
 
         getFullPath(dirEntry,directoryName,filePath);
 
-        
-        
         if(tryStat(pfileStat, filePath) != 0){
             exit(1);
         }
         else {
             printLsl(dirEntry, pfileStat);
-            
         }
     }
 
