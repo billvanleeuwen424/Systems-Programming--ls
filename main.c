@@ -1,4 +1,6 @@
+
 #include <stdio.h>
+
 #include <stdlib.h>
 #include <string.h>
 //for opendir and readdir
@@ -9,6 +11,8 @@
 #include <unistd.h>
 //for errno
 #include <errno.h>
+//for time
+#include <time.h>
 
 int checkMaxParams(int argc, char *argv[]);
 void cpyDirectory(char * director, int position, char *argv[]);
@@ -33,7 +37,7 @@ int main( int argc, char *argv[] )
     argc = 2;
     argv[0] = "./main";
     //argv[1] = "/fakeDir/Fake";
-    argv[1] = "/home/billslaptop/Documents/TrentU/3380";
+    argv[1] = "/home/billDesktop/Documents/TrentU/3380/oldlab2/lab2 first";
 
     /*************************
      * GET DIRECTORY SECTION *
@@ -78,14 +82,21 @@ int main( int argc, char *argv[] )
 
         getFullPath(dirEntry,directoryName,filePath);
 
-        printf(" %s", dirEntry->d_name);
+        
         
         if(tryStat(pfileStat, filePath) != 0){
             exit(1);
         }
         else {
-            printf(" %lu\n", pfileStat->st_size);
-            printf(" %lu\n", pfileStat->st_atime);
+
+            /*get and format time*/
+            time_t modTime =  pfileStat->st_mtime;
+            struct tm  ts;
+            char buf[80];
+            ts = *localtime(&modTime);
+            strftime(buf, sizeof(buf), "%b %d %Y [%H:%M] ", &ts);
+
+            printf("%-4d %-4d %-4d %-5lu %-18s %-7s\n", pfileStat->st_mode, pfileStat->st_uid, pfileStat->st_gid, pfileStat->st_size, buf, dirEntry->d_name);
         }
     }
 
