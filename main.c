@@ -26,7 +26,7 @@ int tryReadDir(DIR **dir, struct dirent **dirEntry);
 void getFullPath(struct dirent *pdirectoryEntry, char *dirpath, char *fullPath);
 int tryStat(struct stat *fileStats, char *fullPath);
 void printLs(struct dirent *dirEntry);
-void printLsl(struct dirent *dirEntry, struct stat *fileStats);
+void printLsl(char *filename, struct stat *pfileStat);
 
 char *filePermStr(mode_t perm, int flags);
 
@@ -74,6 +74,7 @@ int main( int argc, char *argv[] )
 
     struct dirent *dirEntry;
     char filePath[MAX_BUFFER];
+    char filename[MAX_DIR_LENGTH];
     struct stat fileStat;
     struct stat *pfileStat = &fileStat;
     
@@ -83,11 +84,13 @@ int main( int argc, char *argv[] )
 
         getFullPath(dirEntry,directoryName,filePath);
 
+        strncpy(filename, dirEntry->d_name, MAX_DIR_LENGTH);
+
         if(tryStat(pfileStat, filePath) != 0){
             exit(1);
         }
         else {
-            printLsl(dirEntry, pfileStat);
+            printLsl(filename, pfileStat);
         }
     }
 
@@ -255,7 +258,7 @@ int tryStat(struct stat *fileStats, char *fullPath){
 }
 
 /*this function will print the stats of a file in an ls -l format*/
-void printLsl(struct dirent *dirEntry, struct stat *pfileStat){
+void printLsl(char *filename, struct stat *pfileStat){
 
     /* convert the gid/uid to group/passwd structs inorder to print string */
     struct group *grp;
@@ -275,7 +278,7 @@ void printLsl(struct dirent *dirEntry, struct stat *pfileStat){
     
 
     /*print in ls -l format. filePermStr to format the permissions*/
-    printf("%-4s %-6s %-6s %5lu %-18s %-7s\n", filePermStr(pfileStat->st_mode,1), pwd->pw_name, grp->gr_name, pfileStat->st_size, timeString, dirEntry->d_name);
+    printf("%-4s %-6s %-6s %5lu %-18s %-7s\n", filePermStr(pfileStat->st_mode,1), pwd->pw_name, grp->gr_name, pfileStat->st_size, timeString, filename);
 
     /*
     incase we need to go back from the borrowed function
@@ -284,9 +287,9 @@ void printLsl(struct dirent *dirEntry, struct stat *pfileStat){
 }
 
 /*this function will print the stats of a file in a regulat ls format*/
-void printLs(struct dirent *dirEntry){
+void printLs(char *filename){
 
-    printf(" %-7s", dirEntry->d_name);
+    printf(" %-7s", filename);
 
 }
 
