@@ -292,6 +292,7 @@ void printLsl(struct dirent *dirEntry, struct stat *pfileStat){
     printf("%-4o %-6s %-6s %5lu %-18s %-7s\n", pfileStat->st_mode, pwd->pw_name, grp->gr_name, pfileStat->st_size, timeString, dirEntry->d_name);
     */
 }
+
 /*this function will print the stats of a file in a regulat ls format*/
 void printLs(struct dirent *dirEntry){
 
