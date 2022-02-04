@@ -13,6 +13,10 @@
 #include <errno.h>
 //for time
 #include <time.h>
+//for conversion of gid and uid to strings
+#include <pwd.h>
+#include <grp.h>
+
 
 int checkMaxParams(int argc, char *argv[]);
 void cpyDirectory(char * director, int position, char *argv[]);
@@ -23,6 +27,8 @@ int tryReadDir(DIR **dir, struct dirent **dirEntry);
 void getFullPath(struct dirent *pdirectoryEntry, char *dirpath, char *fullPath);
 int tryStat(struct stat *fileStats, char *fullPath);
 void printLsl(struct dirent *dirEntry, struct stat *fileStats);
+
+char *filePermStr(mode_t perm, int flags);
 
 #define MAX_DIR_LENGTH 256
 #define MAX_PARAMS 2
@@ -261,6 +267,20 @@ int tryStat(struct stat *fileStats, char *fullPath){
 /*this function will print the stats of a file in an ls -l format*/
 void printLsl(struct dirent *dirEntry, struct stat *pfileStat){
 
+
+
+    // reference https://stackoverflow.com/a/7624184
+    struct group *grp;
+    struct passwd *pwd;
+
+    grp = getgrgid(pfileStat->st_gid);
+
+    pwd = getpwuid(pfileStat->st_uid);
+
+
+    //int getpwuid_r(uid_t uid, struct passwd *pwd,char *buf, size_t buflen, struct passwd **result);
+
+
     /*get and format time*/
     time_t modTime =  pfileStat->st_mtime;
     struct tm  ts;
@@ -270,5 +290,47 @@ void printLsl(struct dirent *dirEntry, struct stat *pfileStat){
 
     strftime(timeString, sizeof(timeString), "%b %d %Y [%H:%M] ", &ts);
 
-    printf("%-4d %-4d %-4d %-5lu %-18s %-7s\n", pfileStat->st_mode, pfileStat->st_uid, pfileStat->st_gid, pfileStat->st_size, timeString, dirEntry->d_name);
+    printf(" %s", filePermStr(pfileStat->st_mode,1));
+
+
+    //print in octal = o for permission
+    printf("%-4o %-6s %-6s %5lu %-18s %-7s\n", pfileStat->st_mode, pwd->pw_name, grp->gr_name, pfileStat->st_size, timeString, dirEntry->d_name);
+}
+
+
+/*this function will take the mode_t from the stat type and return a formatted string of permissions
+
+this function was unashamedly stolen from:
+    The Linux Programming Interface
+    Chapter 15
+    pg 296
+
+*/
+
+#define FILE_PERMS_H
+#include <sys/types.h>
+#define FP_SPECIAL 1
+
+
+#define STR_SIZE sizeof("rwxrwxrwx")
+
+
+char *filePermStr(mode_t perm, int flags){
+    static char str[STR_SIZE];
+
+    snprintf(str, STR_SIZE, "%c%c%c%c%c%c%c%c%c",
+        (perm & S_IRUSR) ? 'r' : '-', (perm & S_IWUSR) ? 'w' : '-',
+        (perm & S_IXUSR) ?
+            (((perm & S_ISUID) && (flags & FP_SPECIAL)) ? 's' : 'x') :
+            (((perm & S_ISUID) && (flags & FP_SPECIAL)) ? 'S' : '-'),
+        (perm & S_IRGRP) ? 'r' : '-', (perm & S_IWGRP) ? 'w' : '-',
+        (perm & S_IXGRP) ?
+            (((perm & S_ISGID) && (flags & FP_SPECIAL)) ? 's' : 'x') :
+            (((perm & S_ISGID) && (flags & FP_SPECIAL)) ? 'S' : '-'),
+        (perm & S_IROTH) ? 'r' : '-', (perm & S_IWOTH) ? 'w' : '-',
+        (perm & S_IXOTH) ?
+            (((perm & S_ISVTX) && (flags & FP_SPECIAL)) ? 't' : 'x') :
+            (((perm & S_ISVTX) && (flags & FP_SPECIAL)) ? 'T' : '-'));
+
+    return str;
 }
