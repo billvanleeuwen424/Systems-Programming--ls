@@ -22,6 +22,7 @@ int tryOpenDir(DIR **dir, char * dirpath);
 int tryReadDir(DIR **dir, struct dirent **dirEntry);
 void getFullPath(struct dirent *pdirectoryEntry, char *dirpath, char *fullPath);
 int tryStat(struct stat *fileStats, char *fullPath);
+void printLsl(struct dirent *dirEntry, struct stat *fileStats);
 
 #define MAX_DIR_LENGTH 256
 #define MAX_PARAMS 2
@@ -88,15 +89,8 @@ int main( int argc, char *argv[] )
             exit(1);
         }
         else {
-
-            /*get and format time*/
-            time_t modTime =  pfileStat->st_mtime;
-            struct tm  ts;
-            char buf[80];
-            ts = *localtime(&modTime);
-            strftime(buf, sizeof(buf), "%b %d %Y [%H:%M] ", &ts);
-
-            printf("%-4d %-4d %-4d %-5lu %-18s %-7s\n", pfileStat->st_mode, pfileStat->st_uid, pfileStat->st_gid, pfileStat->st_size, buf, dirEntry->d_name);
+            printLsl(dirEntry, pfileStat);
+            
         }
     }
 
@@ -262,4 +256,19 @@ int tryStat(struct stat *fileStats, char *fullPath){
     }
 
     return returnVal;
+}
+
+/*this function will print the stats of a file in an ls -l format*/
+void printLsl(struct dirent *dirEntry, struct stat *pfileStat){
+
+    /*get and format time*/
+    time_t modTime =  pfileStat->st_mtime;
+    struct tm  ts;
+    char timeString[80];
+
+    ts = *localtime(&modTime);
+
+    strftime(timeString, sizeof(timeString), "%b %d %Y [%H:%M] ", &ts);
+
+    printf("%-4d %-4d %-4d %-5lu %-18s %-7s\n", pfileStat->st_mode, pfileStat->st_uid, pfileStat->st_gid, pfileStat->st_size, timeString, dirEntry->d_name);
 }
