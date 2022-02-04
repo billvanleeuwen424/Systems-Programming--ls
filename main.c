@@ -40,12 +40,6 @@ char *filePermStr(mode_t perm, int flags);
 
 int main( int argc, char *argv[] )
 {
-    /*debugging*/
-    argc = 2;
-    argv[0] = "./main";
-    //argv[1] = "/fakeDir/Fake";
-    argv[1] = "/home/billDesktop/Documents/TrentU/3380/oldlab2/lab2 first";
-
     /*************************
      * GET DIRECTORY SECTION *
      *************************/
@@ -128,8 +122,6 @@ void cpyDirectory(char * directory, int position, char *argv[]){
  *      0: just right amount of params
  *      1: too many params
  *      -1: too few params
- *      
- * 
  * Reference: I took this from the /home/COIS/3380/sample_scripts directory.
  * I also refactored this to make it my own
  */
@@ -148,13 +140,14 @@ int checkMaxParams(int argc, char *argv[]){
         returnval = -1;
     }
 
-    /*DEBUGGING*/
+    /*DEBUGGING
     while( parameter_count < argc )
     {
         printf("\tparameter[%d]: %s\n",parameter_count,argv[parameter_count]);
         parameter_count++;
     }
     printf("\n");
+    */
 
     return returnval;
 }
