@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 
 #include <stdlib.h>
@@ -26,6 +25,7 @@ int tryOpenDir(DIR **dir, char * dirpath);
 int tryReadDir(DIR **dir, struct dirent **dirEntry);
 void getFullPath(struct dirent *pdirectoryEntry, char *dirpath, char *fullPath);
 int tryStat(struct stat *fileStats, char *fullPath);
+void printLs(struct dirent *dirEntry);
 void printLsl(struct dirent *dirEntry, struct stat *fileStats);
 
 char *filePermStr(mode_t perm, int flags);
@@ -267,9 +267,7 @@ int tryStat(struct stat *fileStats, char *fullPath){
 /*this function will print the stats of a file in an ls -l format*/
 void printLsl(struct dirent *dirEntry, struct stat *pfileStat){
 
-    /* convert the gid/uid to group/passwd structs
-    doing this to print the text rather than numbers
-    reference https://stackoverflow.com/a/7624184 */
+    /* convert the gid/uid to group/passwd structs inorder to print string */
     struct group *grp;
     struct passwd *pwd;
     grp = getgrgid(pfileStat->st_gid);
@@ -290,15 +288,19 @@ void printLsl(struct dirent *dirEntry, struct stat *pfileStat){
     printf("%-4s %-6s %-6s %5lu %-18s %-7s\n", filePermStr(pfileStat->st_mode,1), pwd->pw_name, grp->gr_name, pfileStat->st_size, timeString, dirEntry->d_name);
 
     /*
-    incase we need to go back from the stolen function
+    incase we need to go back from the borrowed function
     printf("%-4o %-6s %-6s %5lu %-18s %-7s\n", pfileStat->st_mode, pwd->pw_name, grp->gr_name, pfileStat->st_size, timeString, dirEntry->d_name);
     */
 }
+/*this function will print the stats of a file in a regulat ls format*/
+void printLs(struct dirent *dirEntry){
 
+    printf(" %-7s", dirEntry->d_name);
+
+}
 
 /*this function will take the mode_t from the stat type and return a formatted string of permissions
-
-this function was unashamedly stolen from:
+this function was unashamedly taken from:
     The Linux Programming Interface
     Chapter 15
     pg 296
