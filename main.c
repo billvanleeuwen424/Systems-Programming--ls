@@ -267,18 +267,13 @@ int tryStat(struct stat *fileStats, char *fullPath){
 /*this function will print the stats of a file in an ls -l format*/
 void printLsl(struct dirent *dirEntry, struct stat *pfileStat){
 
-
-
-    // reference https://stackoverflow.com/a/7624184
+    /* convert the gid/uid to group/passwd structs
+    doing this to print the text rather than numbers
+    reference https://stackoverflow.com/a/7624184 */
     struct group *grp;
     struct passwd *pwd;
-
     grp = getgrgid(pfileStat->st_gid);
-
     pwd = getpwuid(pfileStat->st_uid);
-
-
-    //int getpwuid_r(uid_t uid, struct passwd *pwd,char *buf, size_t buflen, struct passwd **result);
 
 
     /*get and format time*/
@@ -289,12 +284,15 @@ void printLsl(struct dirent *dirEntry, struct stat *pfileStat){
     ts = *localtime(&modTime);
 
     strftime(timeString, sizeof(timeString), "%b %d %Y [%H:%M] ", &ts);
+    
 
-    printf(" %s", filePermStr(pfileStat->st_mode,1));
+    /*print in ls -l format. filePermStr to format the permissions*/
+    printf("%-4s %-6s %-6s %5lu %-18s %-7s\n", filePermStr(pfileStat->st_mode,1), pwd->pw_name, grp->gr_name, pfileStat->st_size, timeString, dirEntry->d_name);
 
-
-    //print in octal = o for permission
+    /*
+    incase we need to go back from the stolen function
     printf("%-4o %-6s %-6s %5lu %-18s %-7s\n", pfileStat->st_mode, pwd->pw_name, grp->gr_name, pfileStat->st_size, timeString, dirEntry->d_name);
+    */
 }
 
 
@@ -305,15 +303,14 @@ this function was unashamedly stolen from:
     Chapter 15
     pg 296
 
+full disclosure. I'm not sure what the flags input does
 */
-
 #define FILE_PERMS_H
 #include <sys/types.h>
 #define FP_SPECIAL 1
 
 
 #define STR_SIZE sizeof("rwxrwxrwx")
-
 
 char *filePermStr(mode_t perm, int flags){
     static char str[STR_SIZE];
