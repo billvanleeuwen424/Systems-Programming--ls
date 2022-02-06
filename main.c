@@ -26,7 +26,7 @@ int tryReadDir(DIR **dir, struct dirent **dirEntry);
 void getFullPath(struct dirent *pdirectoryEntry, char *dirpath, char *fullPath);
 int tryStat(struct stat *fileStats, char *fullPath);
 void printLs(char *filename);
-void printLsl(char *filename, struct stat *pfileStat);
+void printLsl(char *filename, struct stat *pfileStat, int printFlag, char *printString);
 void printDir(char *filepath);
 
 char *filePermStr(mode_t perm, int flags);
@@ -37,6 +37,7 @@ char *filePermStr(mode_t perm, int flags);
 
 
 #define MAX_BUFFER 4096
+#define MAX_FILES 1000
 
 
 int main( int argc, char *argv[] )
@@ -79,6 +80,9 @@ int main( int argc, char *argv[] )
     struct stat fileStat;
     struct stat *pfileStat = &fileStat;
     
+    /*file array for recursive file printing*/
+    char *files[MAX_FILES];
+    int filesCounter =0;
 
     /*loop here til error or null entry*/
     while (tryReadDir(&dir, &dirEntry) == 0){
@@ -87,7 +91,7 @@ int main( int argc, char *argv[] )
 
         strncpy(filename, dirEntry->d_name, MAX_DIR_LENGTH);
 
-        
+        /*only passes if not ".." or "."*/
         if(!((filename[0] == '.' && filename[1] == '.') || (filename[0] == '.' && filename[1] == '\0'))){
 
             /*if error exit*/
@@ -96,32 +100,24 @@ int main( int argc, char *argv[] )
             }
             else {
 
-
-
-                
-
+                /*recurse if a directory*/
                 if(S_ISDIR(pfileStat->st_mode) == 1){
 
                     printDir(filePath);
 
-
+                    /*set arguments for recursive call*/
                     char *recurseArgs[2];
-
                     recurseArgs[0] = "./main";
-
                     char recursePath[MAX_DIR_LENGTH];
-
                     strcpy(recursePath, filePath);
-
-                    //strncat(recursePath, "/", 1);
-                    //strcat(recursePath, filename);
-
                     recurseArgs[1] =  recursePath;
 
                     main(2, recurseArgs);
                 }
                 else {
-                    printLsl(filename, pfileStat);
+                    //printLsl(filename, pfileStat);
+                    //files[filesCounter] = 
+
                 }
 
             }
@@ -291,8 +287,9 @@ int tryStat(struct stat *fileStats, char *fullPath){
     return returnVal;
 }
 
-/*this function will print the stats of a file in an ls -l format*/
-void printLsl(char *filename, struct stat *pfileStat){
+/*this function will print the stats of a file in an ls -l format
+printFlag: will printf the string if ! 0*/
+void printLsl(char *filename, struct stat *pfileStat, int printFlag, char *printString){
 
     /* convert the gid/uid to group/passwd structs inorder to print string */
     struct group *grp;
@@ -312,7 +309,12 @@ void printLsl(char *filename, struct stat *pfileStat){
     
 
     /*print in ls -l format. filePermStr to format the permissions*/
-    printf("%-4s %-6s %-6s %5lu %-18s %-7s\n", filePermStr(pfileStat->st_mode,1), pwd->pw_name, grp->gr_name, pfileStat->st_size, timeString, filename);
+    snprintf(printString, 500, "%-4s %-6s %-6s %5lu %-18s %-7s\n", filePermStr(pfileStat->st_mode,1), pwd->pw_name, grp->gr_name, pfileStat->st_size, timeString, filename);
+
+    if (printFlag != 0){
+        printf("%s\n", printString);
+    }
+    
 
     /*
     incase we need to go back from the borrowed function
