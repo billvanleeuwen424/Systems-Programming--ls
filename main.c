@@ -86,6 +86,7 @@ int main( int argc, char *argv[] )
 
         strncpy(filename, dirEntry->d_name, MAX_DIR_LENGTH);
 
+        /*if error exit*/
         if(tryStat(pfileStat, filePath) != 0){
             exit(1);
         }
