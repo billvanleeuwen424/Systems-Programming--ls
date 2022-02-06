@@ -27,6 +27,7 @@ void getFullPath(struct dirent *pdirectoryEntry, char *dirpath, char *fullPath);
 int tryStat(struct stat *fileStats, char *fullPath);
 void printLs(char *filename);
 void printLsl(char *filename, struct stat *pfileStat);
+void printDir(char *filepath);
 
 char *filePermStr(mode_t perm, int flags);
 
@@ -86,12 +87,44 @@ int main( int argc, char *argv[] )
 
         strncpy(filename, dirEntry->d_name, MAX_DIR_LENGTH);
 
-        /*if error exit*/
-        if(tryStat(pfileStat, filePath) != 0){
-            exit(1);
-        }
-        else {
-            printLsl(filename, pfileStat);
+        
+        if(!((filename[0] == '.' && filename[1] == '.') || (filename[0] == '.' && filename[1] == '\0'))){
+
+            /*if error exit*/
+            if(tryStat(pfileStat, filePath) != 0){
+                exit(1);
+            }
+            else {
+
+
+
+                
+
+                if(S_ISDIR(pfileStat->st_mode) == 1){
+
+                    printDir(filePath);
+
+
+                    char *recurseArgs[2];
+
+                    recurseArgs[0] = "./main";
+
+                    char recursePath[MAX_DIR_LENGTH];
+
+                    strcpy(recursePath, filePath);
+
+                    //strncat(recursePath, "/", 1);
+                    //strcat(recursePath, filename);
+
+                    recurseArgs[1] =  recursePath;
+
+                    main(2, recurseArgs);
+                }
+                else {
+                    printLsl(filename, pfileStat);
+                }
+
+            }
         }
     }
 
@@ -228,7 +261,7 @@ int tryReadDir(DIR **dir, struct dirent **dirEntry){
 
 
 /*
-This function will return a filename with its path as a single string.
+This function will load the fullpath with the passed dirent's fullpath.
 It requires the files directory entry, and the path of the file.
 */
 void getFullPath(struct dirent *pdirectoryEntry, char *dirpath, char *fullPath){
@@ -292,6 +325,12 @@ void printLs(char *filename){
 
     printf(" %-7s", filename);
 
+}
+
+/*simple formatting print function for directories
+prints a new line and the filepath*/
+void printDir(char *filepath){
+    printf("\n%s\n", filepath);
 }
 
 /*this function will take the mode_t from the stat type and return a formatted string of permissions
