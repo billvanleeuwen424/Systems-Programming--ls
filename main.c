@@ -43,9 +43,51 @@ char *filePermStr(mode_t perm, int flags);
 int main( int argc, char *argv[] )
 {
 
+/* DEBUGGING. Way of parsing flags. Got stuck on using main as recursive maybe? 
     argc = 2;
 
     argv[1] = "-Rl";
+
+
+    char directoryName[MAX_DIR_LENGTH];
+
+    int maxParamReturnVal = checkMaxParams(argc, argv);
+    
+    /*check if cmdline flags were passed
+    int flags[2];
+    int flagBool = parseFlags(flags, argv);
+
+
+    /*too many params
+    if(maxParamReturnVal == 1){ 
+        exit(1);
+    }
+
+
+    /*figure out if a dir was passed or not
+    if(flagBool == 1){
+
+        if(argc <= 2){
+            getcwd(directoryName, MAX_BUFFER);
+        }
+        else{
+            cpyDirectory(directoryName, 1, argv);
+        }
+    }   
+    else{
+        if(argc <= 1){
+            getcwd(directoryName, MAX_BUFFER);
+        }
+        else{
+            cpyDirectory(directoryName, 2, argv);
+        }
+    }
+
+*/
+
+
+
+
 
     /*************************
      * GET DIRECTORY SECTION *
@@ -54,42 +96,19 @@ int main( int argc, char *argv[] )
     char directoryName[MAX_DIR_LENGTH];
 
     int maxParamReturnVal = checkMaxParams(argc, argv);
-    
-    /*check if cmdline flags were passed*/
-    int flags[2];
-    int flagBool = parseFlags(flags, argv);
 
 
-
-    
-    
     /*error check and get either cwd or cmdline arg */
     if(maxParamReturnVal == 1){ /*too many params*/
         exit(1);
     }
-
-    if(flagBool == 1){
-
-    }
-    else{
-
-    }
-
-
-
     /*empty cmdline. getcwd*/
-    if(maxParamReturnVal == -1){   
+    else if(maxParamReturnVal == -1){   
         getcwd(directoryName, MAX_BUFFER);
     }
     /*copy the dirname from argv*/
     else{
-        if(flagBool == 1){
-            cpyDirectory(directoryName, 2, argv);
-        }
-        else{
-            cpyDirectory(directoryName, 1, argv);
-        }
-           
+        cpyDirectory(directoryName, 1, argv);   
     }  
     
 
@@ -236,7 +255,7 @@ int checkMaxParams(int argc, char *argv[]){
         printf("Too many parameters. Exit. \n");
         returnval = 1;
     }
-    else if (argc < MIN_PARAMS)
+    else if (argc <= MIN_PARAMS)
     {
         returnval = -1;
     }
