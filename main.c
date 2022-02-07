@@ -83,7 +83,8 @@ int main( int argc, char *argv[] )
     /*file array for recursive file printing*/
     char files[MAX_FILES][256];
     int filesCounter =0;
-    char lsOutput[256]; /*256 is line length*/
+    char lsOutput[MAX_DIR_LENGTH];
+    
 
     /*loop here til error or null entry*/
     while (tryReadDir(&dir, &dirEntry) == 0){
@@ -92,8 +93,8 @@ int main( int argc, char *argv[] )
 
         strncpy(filename, dirEntry->d_name, MAX_DIR_LENGTH);
 
-        /*only passes if not ".." or "."*/ /*DEBUGGING FOR .git */
-        if(!((filename[0] == '.' && filename[1] == '.') || (filename[0] == '.' && filename[1] == '\0') || (filename[0] == '.' && filename[1] == 'g'))){
+        /*only passes if not ".." or "."*/
+        if(!((filename[0] == '.' && filename[1] == '.') || (filename[0] == '.' && filename[1] == '\0'))){
 
             /*if error exit*/
             if(tryStat(pfileStat, filePath) != 0){
@@ -103,8 +104,6 @@ int main( int argc, char *argv[] )
 
                 /*recurse if a directory*/
                 if(S_ISDIR(pfileStat->st_mode) == 1){
-
-                    printDir(filePath);
 
                     /*set arguments for recursive call*/
                     char *recurseArgs[2];
@@ -125,6 +124,8 @@ int main( int argc, char *argv[] )
         }
     }
 
+    printDir(directoryName);
+    printf("total: %d\n", filesCounter);
     for(int i = 0; i < filesCounter; i++){
         printf("%s", files[i]);
     }
