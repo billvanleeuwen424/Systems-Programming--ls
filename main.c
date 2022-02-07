@@ -16,7 +16,7 @@
 #include <pwd.h>
 #include <grp.h>
 
-
+int parseFlags(int flags[2], char *argv[]);
 int checkMaxParams(int argc, char *argv[]);
 void cpyDirectory(char * director, int position, char *argv[]);
 int getLastFileModification(struct stat *pfileStats, char *fullPath);
@@ -32,7 +32,7 @@ void printDir(char *filepath);
 char *filePermStr(mode_t perm, int flags);
 
 #define MAX_DIR_LENGTH 256
-#define MAX_PARAMS 2
+#define MAX_PARAMS 3
 #define MIN_PARAMS 1
 
 
@@ -42,6 +42,11 @@ char *filePermStr(mode_t perm, int flags);
 
 int main( int argc, char *argv[] )
 {
+
+    argc = 2;
+
+    argv[1] = "-Rl";
+
     /*************************
      * GET DIRECTORY SECTION *
      *************************/
@@ -50,17 +55,41 @@ int main( int argc, char *argv[] )
 
     int maxParamReturnVal = checkMaxParams(argc, argv);
     
+    /*check if cmdline flags were passed*/
+    int flags[2];
+    int flagBool = parseFlags(flags, argv);
+
+
+
+    
+    
     /*error check and get either cwd or cmdline arg */
     if(maxParamReturnVal == 1){ /*too many params*/
         exit(1);
     }
+
+    if(flagBool == 1){
+
+    }
+    else{
+
+    }
+
+
+
     /*empty cmdline. getcwd*/
-    else if(maxParamReturnVal == -1){   
+    if(maxParamReturnVal == -1){   
         getcwd(directoryName, MAX_BUFFER);
     }
     /*copy the dirname from argv*/
     else{
-        cpyDirectory(directoryName, 1, argv);   
+        if(flagBool == 1){
+            cpyDirectory(directoryName, 2, argv);
+        }
+        else{
+            cpyDirectory(directoryName, 1, argv);
+        }
+           
     }  
     
 
@@ -93,7 +122,7 @@ int main( int argc, char *argv[] )
 
         strncpy(filename, dirEntry->d_name, MAX_DIR_LENGTH);
 
-        /*only passes if not ".." or "."*/
+        /*only passes if not "..int parseFlags(int *flags[2], char *argv[])" or "."*/
         if(!((filename[0] == '.' && filename[1] == '.') || (filename[0] == '.' && filename[1] == '\0'))){
 
             /*if error exit*/
@@ -126,11 +155,47 @@ int main( int argc, char *argv[] )
 
     printDir(directoryName);
     printf("total: %d\n", filesCounter);
+    
     for(int i = 0; i < filesCounter; i++){
         printf("%s", files[i]);
     }
 
     return 0;
+}
+
+/*
+will check if flags are present in the [1] parameter in argv. returns 1 if there are. 0 if not.
+flags: an array of ints used as bools. If any are set to 1, that is a key that the user passed that flag
+flag index: 
+[0] -R (recursive)
+[1] -l (long listing)
+*/
+int parseFlags(int flags[2], char *argv[]){
+
+    if(argv[1][0] == '-'){
+        for(int i = 1; i < strlen(argv[1]); i++){
+
+            switch (argv[1][i])
+            {
+            case 'R':
+                flags[0] = 1;
+                break;
+
+            case 'l':
+                flags[1] = 1;
+                break;
+
+            default:
+                break;
+            }
+        }
+
+        return 1;
+    }
+
+    else{
+        return 0;
+    }
 }
 
 
@@ -171,7 +236,7 @@ int checkMaxParams(int argc, char *argv[]){
         printf("Too many parameters. Exit. \n");
         returnval = 1;
     }
-    else if (argc <= MIN_PARAMS)
+    else if (argc < MIN_PARAMS)
     {
         returnval = -1;
     }
