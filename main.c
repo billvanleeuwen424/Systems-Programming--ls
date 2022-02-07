@@ -81,8 +81,9 @@ int main( int argc, char *argv[] )
     struct stat *pfileStat = &fileStat;
     
     /*file array for recursive file printing*/
-    char *files[MAX_FILES];
+    char files[MAX_FILES][256];
     int filesCounter =0;
+    char lsOutput[256]; /*256 is line length*/
 
     /*loop here til error or null entry*/
     while (tryReadDir(&dir, &dirEntry) == 0){
@@ -91,8 +92,8 @@ int main( int argc, char *argv[] )
 
         strncpy(filename, dirEntry->d_name, MAX_DIR_LENGTH);
 
-        /*only passes if not ".." or "."*/
-        if(!((filename[0] == '.' && filename[1] == '.') || (filename[0] == '.' && filename[1] == '\0'))){
+        /*only passes if not ".." or "."*/ /*DEBUGGING FOR .git */
+        if(!((filename[0] == '.' && filename[1] == '.') || (filename[0] == '.' && filename[1] == '\0') || (filename[0] == '.' && filename[1] == 'g'))){
 
             /*if error exit*/
             if(tryStat(pfileStat, filePath) != 0){
@@ -115,13 +116,17 @@ int main( int argc, char *argv[] )
                     main(2, recurseArgs);
                 }
                 else {
-                    //printLsl(filename, pfileStat);
-                    //files[filesCounter] = 
-
+                    printLsl(filename, pfileStat, 0, lsOutput);
+                    strcpy(files[filesCounter],lsOutput);
+                    filesCounter++;
                 }
 
             }
         }
+    }
+
+    for(int i = 0; i < filesCounter; i++){
+        printf("%s", files[i]);
     }
 
     return 0;
@@ -332,7 +337,7 @@ void printLs(char *filename){
 /*simple formatting print function for directories
 prints a new line and the filepath*/
 void printDir(char *filepath){
-    printf("\n%s\n", filepath);
+    printf("\n%s/\n", filepath);
 }
 
 /*this function will take the mode_t from the stat type and return a formatted string of permissions
