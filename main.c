@@ -179,7 +179,9 @@ int main( int argc, char *argv[] )
         printf("%s", files[i]);
     }
 
-    return 0;
+    
+    /*should return 0 on close dir*/
+    return closedir(dir);
 }
 
 /*
