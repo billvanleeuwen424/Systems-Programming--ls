@@ -86,9 +86,6 @@ int main( int argc, char *argv[] )
 */
 
 
-
-
-
     /*************************
      * GET DIRECTORY SECTION *
      *************************/
@@ -407,11 +404,6 @@ void printLsl(char *filename, struct stat *pfileStat, int printFlag, char *print
         printf("%s\n", printString);
     }
     
-
-    /*
-    incase we need to go back from the borrowed function
-    printf("%-4o %-6s %-6s %5lu %-18s %-7s\n", pfileStat->st_mode, pwd->pw_name, grp->gr_name, pfileStat->st_size, timeString, dirEntry->d_name);
-    */
 }
 
 /*this function will print the stats of a file in a regulat ls format*/
