@@ -29,7 +29,7 @@ void printLs(char *filename);
 void printLsl(char *filename, struct stat *pfileStat, int printFlag, char *printString);
 void printDir(char *filepath);
 
-char *filePermStr(mode_t perm, int flags);
+char *filePermissionString(mode_t perm);
 
 #define MAX_DIR_LENGTH 256
 #define MAX_PARAMS 3
@@ -400,8 +400,8 @@ void printLsl(char *filename, struct stat *pfileStat, int printFlag, char *print
     strftime(timeString, sizeof(timeString), "%b %d %Y [%H:%M] ", &ts);
     
 
-    /*print in ls -l format. filePermStr to format the permissions*/
-    snprintf(printString, 500, "%-4s %-6s %-6s %5lu %-18s %-7s\n", filePermStr(pfileStat->st_mode,1), pwd->pw_name, grp->gr_name, pfileStat->st_size, timeString, filename);
+    /*print in ls -l format. filePermissionString to format the permissions*/
+    snprintf(printString, 500, "%-4s %-6s %-6s %5lu %-18s %-7s\n", filePermissionString(pfileStat->st_mode), pwd->pw_name, grp->gr_name, pfileStat->st_size, timeString, filename);
 
     if (printFlag != 0){
         printf("%s\n", printString);
@@ -427,37 +427,36 @@ void printDir(char *filepath){
     printf("\n%s/\n", filepath);
 }
 
+
 /*this function will take the mode_t from the stat type and return a formatted string of permissions
-this function was unashamedly taken from:
+Reference:
     The Linux Programming Interface
     Chapter 15
     pg 296
 
-full disclosure. I'm not sure what the flags input does
+and
+
+https://www.gnu.org/software/libc/manual/html_node/Permission-Bits.html
 */
-#define FILE_PERMS_H
-#include <sys/types.h>
-#define FP_SPECIAL 1
+char *filePermissionString(mode_t permissions){
+    
+    static char permissionsString[9];
+
+    snprintf(permissionsString, 9, "%c%c%c%c%c%c%c%c%c",
+
+    (permissions & S_IRUSR) ? 'r' : '-',
+    (permissions & S_IRUSR) ? 'w' : '-', 
+    (permissions & S_IRUSR) ? 'x' : '-',
+
+    (permissions & S_ISGID) ? 'r' : '-',
+    (permissions & S_ISGID) ? 'w' : '-', 
+    (permissions & S_ISGID) ? 'x' : '-',
+
+    (permissions & S_IROTH) ? 'r' : '-',
+    (permissions & S_IWOTH) ? 'w' : '-', 
+    (permissions & S_IXOTH) ? 'x' : '-'
+    );
 
 
-#define STR_SIZE sizeof("rwxrwxrwx")
-
-char *filePermStr(mode_t perm, int flags){
-    static char str[STR_SIZE];
-
-    snprintf(str, STR_SIZE, "%c%c%c%c%c%c%c%c%c",
-        (perm & S_IRUSR) ? 'r' : '-', (perm & S_IWUSR) ? 'w' : '-',
-        (perm & S_IXUSR) ?
-            (((perm & S_ISUID) && (flags & FP_SPECIAL)) ? 's' : 'x') :
-            (((perm & S_ISUID) && (flags & FP_SPECIAL)) ? 'S' : '-'),
-        (perm & S_IRGRP) ? 'r' : '-', (perm & S_IWGRP) ? 'w' : '-',
-        (perm & S_IXGRP) ?
-            (((perm & S_ISGID) && (flags & FP_SPECIAL)) ? 's' : 'x') :
-            (((perm & S_ISGID) && (flags & FP_SPECIAL)) ? 'S' : '-'),
-        (perm & S_IROTH) ? 'r' : '-', (perm & S_IWOTH) ? 'w' : '-',
-        (perm & S_IXOTH) ?
-            (((perm & S_ISVTX) && (flags & FP_SPECIAL)) ? 't' : 'x') :
-            (((perm & S_ISVTX) && (flags & FP_SPECIAL)) ? 'T' : '-'));
-
-    return str;
+    return permissionsString;
 }
