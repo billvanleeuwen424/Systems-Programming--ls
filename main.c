@@ -43,7 +43,7 @@ char *filePermissionString(mode_t perm);
 int main( int argc, char *argv[] )
 {
 
-/* DEBUGGING. Way of parsing flags. Got stuck on using main as recursive maybe? 
+/* DEBUGGING. Way of parsing flags. Got stuck on using main as recursive maybe? /*
     argc = 2;
 
     argv[1] = "-Rl";
@@ -83,7 +83,6 @@ int main( int argc, char *argv[] )
         }
     }
 
-*/
 
 
     /*************************
@@ -434,15 +433,15 @@ char *filePermissionString(mode_t permissions){
     
     static char permissionsString[9];
 
-    snprintf(permissionsString, 9, "%c%c%c%c%c%c%c%c%c",
+    snprintf(permissionsString, 10, "%c%c%c%c%c%c%c%c%c",
 
     (permissions & S_IRUSR) ? 'r' : '-',
-    (permissions & S_IRUSR) ? 'w' : '-', 
-    (permissions & S_IRUSR) ? 'x' : '-',
+    (permissions & S_IWUSR) ? 'w' : '-', 
+    (permissions & S_IXUSR) ? 'x' : '-',
 
-    (permissions & S_ISGID) ? 'r' : '-',
-    (permissions & S_ISGID) ? 'w' : '-', 
-    (permissions & S_ISGID) ? 'x' : '-',
+    (permissions & S_IRGRP) ? 'r' : '-',
+    (permissions & S_IWGRP) ? 'w' : '-', 
+    (permissions & S_IXGRP) ? 'x' : '-',
 
     (permissions & S_IROTH) ? 'r' : '-',
     (permissions & S_IWOTH) ? 'w' : '-', 
