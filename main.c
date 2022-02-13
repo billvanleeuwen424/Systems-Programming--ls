@@ -1,20 +1,21 @@
 #include <stdio.h>
-
 #include <stdlib.h>
 #include <string.h>
-//for opendir and readdir
-#include <dirent.h>
-//file stats
-#include <sys/stat.h>
-//for getcwd
-#include <unistd.h>
-//for errno
-#include <errno.h>
-//for time
-#include <time.h>
-//for conversion of gid and uid to strings
-#include <pwd.h>
-#include <grp.h>
+/*for opendir and readdir*/
+#include <dirent.h>     
+/*file stats*/
+#include <sys/stat.h>   
+/*for getcwd*/
+#include <unistd.h>     
+/*for errno*/
+#include <errno.h>      
+/*for time*/
+#include <time.h>       
+/*for conversion of uid to strings*/
+#include <pwd.h>        
+/*for conversion of gid to strings*/
+#include <grp.h>        
+
 
 int parseFlags(int flags[2], char *argv[]);
 int checkMaxParams(int argc, char *argv[]);
@@ -29,7 +30,7 @@ void printLs(char *filename, int printFlag, char *printString);
 void printLsl(char *filename, struct stat *pfileStat, int printFlag, char *printString);
 void printDir(char *filepath);
 void getFileName(char *filename, struct dirent *directoryEntry);
-char *filePermissionString(mode_t perm);
+char *filePermissionString(struct stat *fileStats);
 
 #define MAX_DIR_LENGTH 256
 #define MAX_PARAMS 3
@@ -156,7 +157,9 @@ int main( int argc, char *argv[] )
         printDir(directoryName);
         printf("total: %d\n", filesCounter);
     }
-    for(int i = 0; i < filesCounter; i++){
+
+    int i;
+    for(i = 0; i < filesCounter; i++){
         printf("%s", files[i]);
     }
 
@@ -172,9 +175,10 @@ void getFileName(char *filename, struct dirent *directoryEntry){
 
     char *tempName = directoryEntry->d_name;
 
-    //check for spaces in filename
+    /*check for spaces in filename*/
     int spaceFlag = 0;
-    for(int i = 0; i < strlen(tempName); i++ ){
+    int i;
+    for(i = 0; i < strlen(tempName); i++ ){
         if(tempName[i] == ' '){
             spaceFlag = 1;
             break;
@@ -202,9 +206,11 @@ flag index:
 [1] -l (long listing)
 */
 int parseFlags(int flags[2], char *argv[]){
+    
+    int i;
 
     if(argv[1][0] == '-'){
-        for(int i = 1; i < strlen(argv[1]); i++){
+        for(i = 1; i < strlen(argv[1]); i++){
 
             switch (argv[1][i])
             {
@@ -411,7 +417,7 @@ void printLsl(char *filename, struct stat *pfileStat, int printFlag, char *print
     
 
     /*print in ls -l format. filePermissionString to format the permissions*/
-    snprintf(printString, 500, "%-4s %-6s %-6s %5lu %-18s %-7s\n", filePermissionString(pfileStat->st_mode), pwd->pw_name, grp->gr_name, pfileStat->st_size, timeString, filename);
+    snprintf(printString, 500, "%-4s %-6s %-6s %5lu %-18s %-7s\n", filePermissionString(pfileStat), pwd->pw_name, grp->gr_name, pfileStat->st_size, timeString, filename);
 
     if (printFlag != 0){
         printf("%s\n", printString);
@@ -448,23 +454,23 @@ and
 
 https://www.gnu.org/software/libc/manual/html_node/Permission-Bits.html
 */
-char *filePermissionString(mode_t permissions){
-    
+char *filePermissionString(struct stat *fileStats){
+
     static char permissionsString[9];
 
     snprintf(permissionsString, 10, "%c%c%c%c%c%c%c%c%c",
 
-    (permissions & S_IRUSR) ? 'r' : '-',
-    (permissions & S_IWUSR) ? 'w' : '-', 
-    (permissions & S_IXUSR) ? 'x' : '-',
+    (fileStats->st_mode & S_IRUSR) ? 'r' : '-',
+    (fileStats->st_mode & S_IWUSR) ? 'w' : '-', 
+    (fileStats->st_mode & S_IXUSR) ? 'x' : '-',
 
-    (permissions & S_IRGRP) ? 'r' : '-',
-    (permissions & S_IWGRP) ? 'w' : '-', 
-    (permissions & S_IXGRP) ? 'x' : '-',
+    (fileStats->st_mode & S_IRGRP) ? 'r' : '-',
+    (fileStats->st_mode & S_IWGRP) ? 'w' : '-', 
+    (fileStats->st_mode & S_IXGRP) ? 'x' : '-',
 
-    (permissions & S_IROTH) ? 'r' : '-',
-    (permissions & S_IWOTH) ? 'w' : '-', 
-    (permissions & S_IXOTH) ? 'x' : '-'
+    (fileStats->st_mode & S_IROTH) ? 'r' : '-',
+    (fileStats->st_mode & S_IWOTH) ? 'w' : '-', 
+    (fileStats->st_mode & S_IXOTH) ? 'x' : '-'
     );
 
 
