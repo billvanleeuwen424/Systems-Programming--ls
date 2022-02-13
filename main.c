@@ -25,7 +25,7 @@ int tryOpenDir(DIR **dir, char * dirpath);
 int tryReadDir(DIR **dir, struct dirent **dirEntry);
 void getFullPath(struct dirent *pdirectoryEntry, char *dirpath, char *fullPath);
 int tryStat(struct stat *fileStats, char *fullPath);
-void printLs(char *filename);
+void printLs(char *filename, char *printString, int printFlag);
 void printLsl(char *filename, struct stat *pfileStat, int printFlag, char *printString);
 void printDir(char *filepath);
 
@@ -382,11 +382,16 @@ void printLsl(char *filename, struct stat *pfileStat, int printFlag, char *print
     
 }
 
-/*this function will print the stats of a file in a regulat ls format*/
-void printLs(char *filename){
+/*this function will print the stats of a file in a regulat ls format
+if flag is not 0, will printf the string to the console
+*/
+void printLs(char *filename, char *printString, int printFlag){
 
-    printf(" %-7s", filename);
+    snprintf(printString, 500, " %-7s");
 
+    if (printFlag != 0){
+        printf(" %-7s", printString);
+    }
 }
 
 /*simple formatting print function for directories
