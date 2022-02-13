@@ -43,6 +43,10 @@ char *filePermissionString(mode_t perm);
 int main( int argc, char *argv[] )
 {
 
+    /*********************************
+     * GET DIRECTORY AND PARSE FLAGS *
+     *********************************/
+
     char directoryName[MAX_DIR_LENGTH];
 
     int maxParamReturnVal = checkMaxParams(argc, argv);
@@ -81,34 +85,9 @@ int main( int argc, char *argv[] )
         }
     }
 
-
-
-    /*************************
-     * GET DIRECTORY SECTION *
-     *************************
-
-    char directoryName[MAX_DIR_LENGTH];
-
-    int maxParamReturnVal = checkMaxParams(argc, argv);
-
-
-    /*error check and get either cwd or cmdline arg 
-    if(maxParamReturnVal == 1){ /*too many params
-        exit(1);
-    }
-    /*empty cmdline. getcwd
-    else if(maxParamReturnVal == -1){   
-        getcwd(directoryName, MAX_BUFFER);
-    }
-    /*copy the dirname from argv
-    else{
-        cpyDirectory(directoryName, 1, argv);   
-    }  
-    */
-
-    /**************************
-     * GET FILE STATS SECTION *
-     **************************/
+    /******************
+     * GET FILE STATS *
+     ******************/
 
     DIR *dir;
     /*try to open the dir*/
@@ -144,8 +123,8 @@ int main( int argc, char *argv[] )
             }
             else {
 
-                /*recurse if a directory*/
-                if(S_ISDIR(pfileStat->st_mode) == 1){
+                /*recurse if a directory and the -R flag was set*/
+                if(S_ISDIR(pfileStat->st_mode) == 1 && flags[0] == 1){
 
                     /*set arguments for recursive call*/
                     char *recurseArgs[2];
