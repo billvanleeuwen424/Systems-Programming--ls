@@ -25,7 +25,7 @@ int tryOpenDir(DIR **dir, char * dirpath);
 int tryReadDir(DIR **dir, struct dirent **dirEntry);
 void getFullPath(struct dirent *pdirectoryEntry, char *dirpath, char *fullPath);
 int tryStat(struct stat *fileStats, char *fullPath);
-void printLs(char *filename, char *printString, int printFlag);
+void printLs(char *filename, int printFlag, char *printString);
 void printLsl(char *filename, struct stat *pfileStat, int printFlag, char *printString);
 void printDir(char *filepath);
 
@@ -136,7 +136,14 @@ int main( int argc, char *argv[] )
                     main(2, recurseArgs);
                 }
                 else {
-                    printLsl(filename, pfileStat, 0, lsOutput);
+                    /*if -l was passed*/
+                    if(flags[1] == 1){
+                        printLsl(filename, pfileStat, 0, lsOutput);
+                    }
+                    else{
+                        printLs(filename, 0, lsOutput);
+                    }
+
                     strcpy(files[filesCounter],lsOutput);
                     filesCounter++;
                 }
@@ -144,15 +151,17 @@ int main( int argc, char *argv[] )
             }
         }
     }
-
-    printDir(directoryName);
-    printf("total: %d\n", filesCounter);
-    
+    /*if -l was passed */
+    if(flags[1] == 1){
+        printDir(directoryName);
+        printf("total: %d\n", filesCounter);
+    }
     for(int i = 0; i < filesCounter; i++){
         printf("%s", files[i]);
     }
 
-    
+    printf("\n");
+
     /*should return 0 on close dir*/
     return closedir(dir);
 }
@@ -385,12 +394,12 @@ void printLsl(char *filename, struct stat *pfileStat, int printFlag, char *print
 /*this function will print the stats of a file in a regulat ls format
 if flag is not 0, will printf the string to the console
 */
-void printLs(char *filename, char *printString, int printFlag){
+void printLs(char *filename, int printFlag, char *printString){
 
-    snprintf(printString, 500, " %-7s");
+    snprintf(printString, 500, " %*s",5, filename);
 
     if (printFlag != 0){
-        printf(" %-7s", printString);
+        printf(" %s", printString);
     }
 }
 
