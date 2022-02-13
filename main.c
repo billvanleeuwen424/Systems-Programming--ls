@@ -28,7 +28,7 @@ int tryStat(struct stat *fileStats, char *fullPath);
 void printLs(char *filename, int printFlag, char *printString);
 void printLsl(char *filename, struct stat *pfileStat, int printFlag, char *printString);
 void printDir(char *filepath);
-
+void getFileName(char *filename, struct dirent *directoryEntry);
 char *filePermissionString(mode_t perm);
 
 #define MAX_DIR_LENGTH 256
@@ -110,9 +110,9 @@ int main( int argc, char *argv[] )
     /*loop here til error or null entry*/
     while (tryReadDir(&dir, &dirEntry) == 0){
 
-        getFullPath(dirEntry,directoryName,filePath);
+        getFileName(filename, dirEntry);
 
-        strncpy(filename, dirEntry->d_name, MAX_DIR_LENGTH);
+        getFullPath(dirEntry,directoryName,filePath);
 
         /*only passes if not "..int parseFlags(int *flags[2], char *argv[])" or "."*/
         if(!((filename[0] == '.' && filename[1] == '.') || (filename[0] == '.' && filename[1] == '\0'))){
@@ -165,6 +165,34 @@ int main( int argc, char *argv[] )
     /*should return 0 on close dir*/
     return closedir(dir);
 }
+
+/*wrapper function for strncpy. Will add '' around files with spaces
+pass the filename, and directory entry */
+void getFileName(char *filename, struct dirent *directoryEntry){
+
+    char *tempName = directoryEntry->d_name;
+
+    //check for spaces in filename
+    int spaceFlag = 0;
+    for(int i = 0; i < strlen(tempName); i++ ){
+        if(tempName[i] == ' '){
+            spaceFlag = 1;
+            break;
+        }
+    }
+
+    if(spaceFlag == 1){
+        strcpy(filename, "'");
+        strncat(filename, tempName, MAX_BUFFER);
+        strncat(filename, "'", 2);
+    }
+    else{
+        strncpy(filename, tempName, MAX_BUFFER);
+    }
+
+
+}
+
 
 /*
 will check if flags are present in the [1] parameter in argv. returns 1 if there are. 0 if not.
