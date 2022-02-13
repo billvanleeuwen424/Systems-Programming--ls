@@ -43,35 +43,33 @@ char *filePermissionString(mode_t perm);
 int main( int argc, char *argv[] )
 {
 
-/* DEBUGGING. Way of parsing flags. Got stuck on using main as recursive maybe? /*
-    argc = 2;
-
-    argv[1] = "-Rl";
-
-
     char directoryName[MAX_DIR_LENGTH];
 
     int maxParamReturnVal = checkMaxParams(argc, argv);
     
-    /*check if cmdline flags were passed
+    /*check if cmdline flags were passed*/
     int flags[2];
-    int flagBool = parseFlags(flags, argv);
+    int flagBool = 0;
+
+    if(argc >= 2){
+        flagBool = parseFlags(flags, argv);
+    }
 
 
-    /*too many params
+    /*too many params*/
     if(maxParamReturnVal == 1){ 
         exit(1);
     }
 
 
-    /*figure out if a dir was passed or not
+    /*figure out if a dir was passed or not*/
     if(flagBool == 1){
 
         if(argc <= 2){
             getcwd(directoryName, MAX_BUFFER);
         }
         else{
-            cpyDirectory(directoryName, 1, argv);
+            cpyDirectory(directoryName, 2, argv);
         }
     }   
     else{
@@ -79,7 +77,7 @@ int main( int argc, char *argv[] )
             getcwd(directoryName, MAX_BUFFER);
         }
         else{
-            cpyDirectory(directoryName, 2, argv);
+            cpyDirectory(directoryName, 1, argv);
         }
     }
 
@@ -87,26 +85,26 @@ int main( int argc, char *argv[] )
 
     /*************************
      * GET DIRECTORY SECTION *
-     *************************/
+     *************************
 
     char directoryName[MAX_DIR_LENGTH];
 
     int maxParamReturnVal = checkMaxParams(argc, argv);
 
 
-    /*error check and get either cwd or cmdline arg */
-    if(maxParamReturnVal == 1){ /*too many params*/
+    /*error check and get either cwd or cmdline arg 
+    if(maxParamReturnVal == 1){ /*too many params
         exit(1);
     }
-    /*empty cmdline. getcwd*/
+    /*empty cmdline. getcwd
     else if(maxParamReturnVal == -1){   
         getcwd(directoryName, MAX_BUFFER);
     }
-    /*copy the dirname from argv*/
+    /*copy the dirname from argv
     else{
         cpyDirectory(directoryName, 1, argv);   
     }  
-    
+    */
 
     /**************************
      * GET FILE STATS SECTION *
